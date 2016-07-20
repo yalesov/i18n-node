@@ -44,7 +44,9 @@ now you are ready to use a global `i18n.__('Hello')`.
 
 ## Example usage in global scope
 
-In your cli, when not registered to a specific object:
+	    // setting extension of locale files - defaults to '.json' (you might want to set this to '.js' according to webtranslateit)
+	    // supported formats are: .json, .yml
+	    extension: '.js',
 
 ```js
 var greeting = i18n.__('Hello');
@@ -340,7 +342,7 @@ __n('%s cat', 3) // --> 3 Katzen
 
 // long syntax works fine in combination with `updateFiles`
 // --> writes '%s cat' to `one` and '%s cats' to `other` plurals
-// "one" (singular) & "other" (plural) just covers the basic Germanic Rule#1 correctly. 
+// "one" (singular) & "other" (plural) just covers the basic Germanic Rule#1 correctly.
 __n("%s cat", "%s cats", 1); // 1 Katze
 __n("%s cat", "%s cats", 3); // 3 Katzen
 
@@ -955,7 +957,7 @@ i18n.configure({
 * 0.8.0:
     * __improved__: `i18n.__n()` supports all plurals
     * __new__: added MessageFormat by explicit `i18n.__mf()`, `api` alias option, `syncFiles` option
-    * __fixed__: typos, missing and wrong docs, plural bugs like: #210, #191, #190 
+    * __fixed__: typos, missing and wrong docs, plural bugs like: #210, #191, #190
 * 0.7.0:
     * __improved__: `i18n.setLocale()` and `i18n.init()` refactored to comply with most common use cases, much better test coverage and docs
     * __new__: options: `autoReload`, `directoryPermissions`, `register`, `queryParameter`, read locales from filenames with empty `locales` option (#134)

@@ -17,6 +17,7 @@ var vsprintf = require('sprintf-js').vsprintf,
   warn = require('debug')('i18n:warn'),
   error = require('debug')('i18n:error'),
   Mustache = require('mustache'),
+  jsyaml = require('js-yaml'),
   Messageformat = require('messageformat'),
   MakePlural = require('make-plural/make-plural').load(
     require('make-plural/data/plurals.json')
@@ -121,7 +122,10 @@ module.exports = (function() {
     syncFiles = (typeof opt.syncFiles === 'boolean') ? opt.syncFiles : false;
 
     // what to use as the indentation unit (ex: "\t", "  ")
-    indent = (typeof opt.indent === 'string') ? opt.indent : '\t';
+    indent = (typeof opt.indent === 'string') ? opt.indent : "\t";
+    if (opt.extension === '.yaml') {
+      opt.extension = '.yml';
+    }
 
     // json files prefix
     prefix = (typeof opt.prefix === 'string') ? opt.prefix : '';
@@ -1069,15 +1073,21 @@ module.exports = (function() {
   var read = function(locale) {
     var localeFile = {},
       file = getStorageFilePath(locale);
+
     try {
       logDebug('read ' + file + ' for locale: ' + locale);
-      localeFile = fs.readFileSync(file);
+      localeFile = fs.readFileSync(file).toString();
       try {
         // parsing filecontents to locales[locale]
-        locales[locale] = JSON.parse(localeFile);
+          switch (extension) {
+            case '.yml':
+              locales[locale] = jsyaml.load(localeFile);
+              break;
+            default:
+              locales[locale] = JSON.parse(localeFile);
+          }
       } catch (parseError) {
-        logError('unable to parse locales from file (maybe ' +
-          file + ' is empty or invalid json?): ', parseError);
+        logError('unable to parse locales from file (maybe ' + file + ' is empty or invalid '+extension+'?): ', e);
       }
     } catch (readError) {
       // unable to read, so intialize that file
@@ -1123,7 +1133,15 @@ module.exports = (function() {
     try {
       target = getStorageFilePath(locale);
       tmp = target + '.tmp';
-      fs.writeFileSync(tmp, JSON.stringify(locales[locale], null, indent), 'utf8');
+      var fileContents = '';
+      switch (extension) {
+        case '.yml':
+          fileContents = jsyaml.dump(locales[locale]);
+            break;
+        default:
+          fileContents = JSON.stringify(locales[locale], null, indent);
+      }
+      fs.writeFileSync(tmp, fileContents, "utf8");
       stats = fs.statSync(tmp);
       if (stats.isFile()) {
         fs.renameSync(tmp, target);
